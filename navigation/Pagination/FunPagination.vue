@@ -161,13 +161,15 @@ function handleJumpToPage() {
 
 .fun-pagination__jump-input {
   width: 80px;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  box-sizing: border-box;
+  padding: 10px var(--spacing-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--bg-secondary);
   color: var(--text-primary);
   text-align: center;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base, 1rem);
+  line-height: 1.2;
   outline: none;
   transition: border-color var(--transition-base);
   
@@ -180,6 +182,7 @@ function handleJumpToPage() {
   background: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
+
   
   &:hover {
     background: var(--accent-color);
