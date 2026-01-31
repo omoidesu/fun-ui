@@ -18,27 +18,39 @@
               :class="['fun-data-table__cell', col.cellClassName, { 'fun-data-table__cell--editing': isEditing(row, col.key) }]"
               @dblclick="editable && handleCellDoubleClick(row, col.key, idx)"
             >
-              <slot 
-                :name="`cell-${col.key}`" 
-                :row="row" 
+              <template v-if="editable && isEditing(row, col.key)">
+                <FunInput
+                  v-if="!editingIsMultiline"
+                  ref="editInputRef"
+                  v-model="editingValue"
+                  class="fun-data-table__edit-input"
+                  @blur="handleCellBlur(row, col.key, idx)"
+                  @keydown.enter="handleCellBlur(row, col.key, idx)"
+                  @keydown.esc="handleCellCancel(row, col.key, idx)"
+                  autofocus
+                />
+                <textarea
+                  v-else
+                  ref="editTextareaRef"
+                  v-model="editingValue"
+                  class="fun-data-table__edit-input fun-data-table__edit-textarea"
+                  @blur="handleCellBlur(row, col.key, idx)"
+                  @keydown.esc="handleCellCancel(row, col.key, idx)"
+                  rows="6"
+                />
+              </template>
+              <template v-else-if="$slots.cell">
+                <slot name="cell" :value="row[col.key]" :row="row" :column="col" />
+              </template>
+              <slot
+                v-else
+                :name="`cell-${col.key}`"
+                :row="row"
                 :value="row[col.key]"
                 :column="col"
                 :editing="isEditing(row, col.key)"
               >
-                <template v-if="editable && isEditing(row, col.key)">
-                  <FunInput
-                    ref="editInputRef"
-                    v-model="editingValue"
-                    class="fun-data-table__edit-input"
-                    @blur="handleCellBlur(row, col.key, idx)"
-                    @keydown.enter="handleCellBlur(row, col.key, idx)"
-                    @keydown.esc="handleCellCancel(row, col.key, idx)"
-                    autofocus
-                  />
-                </template>
-                <template v-else>
-                  {{ formatCellValue(row[col.key], col) }}
-                </template>
+                {{ formatCellValue(row[col.key], col) }}
               </slot>
             </td>
             <td v-if="showActions" class="fun-data-table__action-cell">
@@ -117,7 +129,9 @@ const emit = defineEmits<{
 const editingCell = ref<{ rowKey: string | number, column: string } | null>(null)
 const editingValue = ref<string>('')
 const editingOldValue = ref<any>(null)
+const editingIsMultiline = ref(false)
 const editInputRef = ref<InstanceType<typeof FunInput> | null>(null)
+const editTextareaRef = ref<HTMLTextAreaElement | null>(null)
 
 // 如果没有提供 columns，从数据中自动提取
 const columns = computed<Column[]>(() => {
@@ -195,13 +209,16 @@ const handleCellDoubleClick = async (row: any, column: string, index: number) =>
   // 保存原始值
   editingOldValue.value = value
   editingValue.value = formatCellValue(value, columns.value.find(c => c.key === column) || { key: column })
+  editingIsMultiline.value = editingValue.value.includes('\n')
   editingCell.value = { rowKey, column }
   
-  // 等待下一个 tick 后聚焦输入框
+  // 等待下一个 tick 后聚焦输入框/文本框
   await nextTick()
-  // 使用 setTimeout 确保在下一个事件循环中聚焦，避免 autofocus 警告
   setTimeout(() => {
-    if (editInputRef.value) {
+    if (editingIsMultiline.value && editTextareaRef.value) {
+      editTextareaRef.value.focus()
+      editTextareaRef.value.select()
+    } else if (editInputRef.value) {
       const inputEl = editInputRef.value.$el as HTMLInputElement
       if (inputEl) {
         inputEl.focus()
@@ -321,6 +338,13 @@ const handleCellCancel = (row: any, column: string, index: number) => {
 .fun-data-table__cell--editing .fun-data-table__edit-input {
   margin: -2px;
   padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.fun-data-table__edit-textarea {
+  height: 800px;
+  min-height: 120px;
+  resize: vertical;
+  display: block;
 }
 
 .fun-data-table__action-column {
