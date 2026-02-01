@@ -43,6 +43,7 @@ import FunGrid from './layout/Grid/FunGrid.vue'
 // Feedback 反馈组件
 import FunAlert from './feedback/Alert/FunAlert.vue'
 import FunConfirmDialog from './feedback/ConfirmDialog/FunConfirmDialog.vue'
+import FunModal from './feedback/Modal/FunModal.vue'
 import FunNotification from './feedback/Notification/FunNotification.vue'
 import FunContextMenu from './feedback/ContextMenu/FunContextMenu.vue'
 
@@ -74,6 +75,7 @@ const components = {
   // Feedback
   FunAlert,
   FunConfirmDialog,
+  FunModal,
   FunNotification,
   FunContextMenu
 }
@@ -103,6 +105,7 @@ export function install(app: App) {
   app.component('fun-grid', FunGrid)
   app.component('fun-alert', FunAlert)
   app.component('fun-confirm-dialog', FunConfirmDialog)
+  app.component('fun-modal', FunModal)
   app.component('fun-notification', FunNotification)
   app.component('fun-context-menu', FunContextMenu)
 }
@@ -135,6 +138,7 @@ export {
   // Feedback
   FunAlert,
   FunConfirmDialog,
+  FunModal,
   FunNotification,
   FunContextMenu
 }
